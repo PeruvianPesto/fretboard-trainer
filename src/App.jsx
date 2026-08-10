@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, useCallback } from 'react'
 import Fretboard from './components/Fretboard.jsx'
 import Controls, { GROUPS } from './components/Controls.jsx'
-import { cellsForStrings, noteAt, randomChoice } from './lib/fretboard.js'
+import { cellsForStrings, noteAt, octaveAt, randomChoice } from './lib/fretboard.js'
 
 export default function App() {
   const [mode, setMode] = useState('all') // 'single' | 'group' | 'all'
@@ -9,6 +9,7 @@ export default function App() {
   const [group, setGroup] = useState(GROUPS[0].indices)
 
   const [targetNote, setTargetNote] = useState(null)
+  const [targetOctave, setTargetOctave] = useState(null)
   const [cellState, setCellState] = useState({}) // { "stringIndex-fret": 'correct' | 'wrong' }
   const [score, setScore] = useState({ correct: 0, attempts: 0 })
   const [streak, setStreak] = useState(0)
@@ -28,6 +29,7 @@ export default function App() {
   const pickTarget = useCallback(() => {
     const cell = randomChoice(scopeCells)
     setTargetNote(noteAt(cell.stringIndex, cell.fret))
+    setTargetOctave(octaveAt(cell.stringIndex, cell.fret))
     setCellState({})
     setLocked(false)
   }, [scopeCells])
@@ -43,8 +45,9 @@ export default function App() {
   function handleCellClick(stringIndex, fret) {
     if (locked || targetNote === null) return
     const clickedNote = noteAt(stringIndex, fret)
+    const clickedOctave = octaveAt(stringIndex, fret)
     const key = `${stringIndex}-${fret}`
-    const isCorrect = clickedNote === targetNote
+    const isCorrect = clickedNote === targetNote && clickedOctave === targetOctave
 
     setScore((s) => ({ correct: s.correct + (isCorrect ? 1 : 0), attempts: s.attempts + 1 }))
 
@@ -82,7 +85,7 @@ export default function App() {
       />
 
       <div className="prompt">
-        Find: <span className="target-note">{targetNote}</span>
+        Find: <span className="target-note">{targetNote}{targetOctave}</span>
       </div>
 
       <Fretboard activeStrings={activeStrings} cellState={cellState} onCellClick={handleCellClick} />
