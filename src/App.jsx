@@ -22,9 +22,13 @@ export default function App() {
   const [locked, setLocked] = useState(false)
   const [heard, setHeard] = useState(null) // { note, octave, cents } — currently sung/played pitch
   const [feedback, setFeedback] = useState(null) // transient "heard the wrong note" message
+  const [elapsedMs, setElapsedMs] = useState(0) // stopwatch for the current note, resets on each correct answer
+  const [avgMs, setAvgMs] = useState(null) // running average time-to-correct-answer
 
   const { listening, error: micError, pitch, start: startListening, stop: stopListening } = usePitchDetector()
   const stableRef = useRef({ note: null, octave: null, count: 0 })
+  const startTimeRef = useRef(performance.now())
+  const timeTotalsRef = useRef({ sum: 0, count: 0 })
 
   const activeStrings = useMemo(() => {
     if (mode === 'single') return new Set([singleString])
@@ -45,13 +49,33 @@ export default function App() {
     setLocked(false)
     setFeedback(null)
     stableRef.current = { note: null, octave: null, count: 0 }
+    startTimeRef.current = performance.now()
+    setElapsedMs(0)
   }, [scopeCells])
+
+  // Stopwatch for the current note — ticks until it's answered correctly.
+  function recordCorrectTime() {
+    const elapsed = performance.now() - startTimeRef.current
+    setElapsedMs(elapsed)
+    const totals = timeTotalsRef.current
+    totals.sum += elapsed
+    totals.count += 1
+    setAvgMs(totals.sum / totals.count)
+  }
+
+  useEffect(() => {
+    if (locked || targetNote === null) return
+    const id = setInterval(() => setElapsedMs(performance.now() - startTimeRef.current), 100)
+    return () => clearInterval(id)
+  }, [locked, targetNote])
 
   // Re-pick whenever the practice scope changes.
   useEffect(() => {
     pickTarget()
     setScore({ correct: 0, attempts: 0 })
     setStreak(0)
+    timeTotalsRef.current = { sum: 0, count: 0 }
+    setAvgMs(null)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode, singleString, group])
 
@@ -64,6 +88,7 @@ export default function App() {
     if (isCorrect) {
       setStreak((n) => n + 1)
       setFeedback(null)
+      recordCorrectTime()
       const matches = cellsMatchingNote(note, octave, [...activeStrings])
       const newState = {}
       matches.forEach(({ stringIndex, fret }) => {
@@ -114,6 +139,7 @@ export default function App() {
 
     if (isCorrect) {
       setStreak((n) => n + 1)
+      recordCorrectTime()
       setCellState((cs) => ({ ...cs, [key]: 'correct' }))
       setLocked(true)
       setTimeout(pickTarget, 450)
@@ -131,6 +157,7 @@ export default function App() {
   }
 
   const accuracy = score.attempts > 0 ? Math.round((score.correct / score.attempts) * 100) : 0
+  const formatSeconds = (ms) => `${(ms / 1000).toFixed(1)}s`
 
   return (
     <div className="app">
@@ -168,6 +195,8 @@ export default function App() {
         <span>Score: {score.correct}/{score.attempts}</span>
         <span>Accuracy: {accuracy}%</span>
         <span>Streak: {streak}</span>
+        <span>Time: {formatSeconds(elapsedMs)}</span>
+        <span>Avg: {avgMs === null ? '—' : formatSeconds(avgMs)}</span>
       </div>
     </div>
   )
