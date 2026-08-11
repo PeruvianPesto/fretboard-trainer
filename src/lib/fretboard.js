@@ -55,3 +55,18 @@ export function cellsForStrings(stringIndices) {
 export function randomChoice(arr) {
   return arr[Math.floor(Math.random() * arr.length)]
 }
+
+// All {stringIndex, fret} cells (within the given strings) that produce
+// the same note+octave — a played pitch can't tell us which string/fret
+// was used, only which pitch was heard, so several cells may all match.
+export function cellsMatchingNote(note, octave, stringIndices) {
+  const cells = []
+  for (const stringIndex of stringIndices) {
+    for (let fret = 0; fret <= FRET_COUNT; fret++) {
+      if (noteAt(stringIndex, fret) === note && octaveAt(stringIndex, fret) === octave) {
+        cells.push({ stringIndex, fret })
+      }
+    }
+  }
+  return cells
+}
