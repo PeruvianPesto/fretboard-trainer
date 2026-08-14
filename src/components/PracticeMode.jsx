@@ -1,9 +1,14 @@
 import { useEffect, useMemo, useState, useCallback, useRef } from 'react'
 import Fretboard from './Fretboard.jsx'
 import Controls, { GROUPS } from './Controls.jsx'
-import { cellsForStrings, cellsMatchingNote, noteAt, octaveAt, randomChoice } from '../lib/fretboard.js'
+import { STRINGS, cellsForStrings, cellsMatchingNote, noteAt, octaveAt, randomChoice } from '../lib/fretboard.js'
 import { usePitchDetector } from '../hooks/usePitchDetector.js'
 import { useStableNote } from '../hooks/useStableNote.js'
+
+function describeCell(stringIndex, fret) {
+  const label = STRINGS[stringIndex].label
+  return fret === 0 ? `open ${label} string` : `${label} string, fret ${fret}`
+}
 
 export default function PracticeMode() {
   const [mode, setMode] = useState('all') // 'single' | 'group' | 'all'
@@ -12,11 +17,12 @@ export default function PracticeMode() {
 
   const [targetNote, setTargetNote] = useState(null)
   const [targetOctave, setTargetOctave] = useState(null)
-  const [cellState, setCellState] = useState({}) // { "stringIndex-fret": 'correct' | 'wrong' }
+  const [targetCell, setTargetCell] = useState(null) // { stringIndex, fret } — where the current target note actually lives
+  const [cellState, setCellState] = useState({}) // { "stringIndex-fret": 'correct' | 'wrong' | 'target' }
   const [score, setScore] = useState({ correct: 0, attempts: 0 })
   const [streak, setStreak] = useState(0)
   const [locked, setLocked] = useState(false)
-  const [feedback, setFeedback] = useState(null) // transient "heard the wrong note" message
+  const [wrongInfo, setWrongInfo] = useState(null) // { heardNote, heardOctave } — drives the wrong-answer popup
   const [elapsedMs, setElapsedMs] = useState(0) // stopwatch for the current note, resets on each correct answer
   const [avgMs, setAvgMs] = useState(null) // running average time-to-correct-answer
 
@@ -39,9 +45,10 @@ export default function PracticeMode() {
     const cell = randomChoice(scopeCells)
     setTargetNote(noteAt(cell.stringIndex, cell.fret))
     setTargetOctave(octaveAt(cell.stringIndex, cell.fret))
+    setTargetCell(cell)
     setCellState({})
     setLocked(false)
-    setFeedback(null)
+    setWrongInfo(null)
     startTimeRef.current = performance.now()
     setElapsedMs(0)
   }, [scopeCells])
@@ -80,7 +87,6 @@ export default function PracticeMode() {
 
     if (isCorrect) {
       setStreak((n) => n + 1)
-      setFeedback(null)
       recordCorrectTime()
       const matches = cellsMatchingNote(note, octave, [...activeStrings])
       const newState = {}
@@ -92,8 +98,9 @@ export default function PracticeMode() {
       setTimeout(pickTarget, 600)
     } else {
       setStreak(0)
-      setFeedback(`Heard ${note}${octave} — try again`)
-      setTimeout(() => setFeedback(null), 700)
+      setLocked(true)
+      setCellState({ [`${targetCell.stringIndex}-${targetCell.fret}`]: 'target' })
+      setWrongInfo({ heardNote: note, heardOctave: octave })
     }
   }
 
@@ -116,15 +123,19 @@ export default function PracticeMode() {
       setTimeout(pickTarget, 450)
     } else {
       setStreak(0)
-      setCellState((cs) => ({ ...cs, [key]: 'wrong' }))
-      setTimeout(() => {
-        setCellState((cs) => {
-          const next = { ...cs }
-          delete next[key]
-          return next
-        })
-      }, 350)
+      setLocked(true)
+      setCellState((cs) => ({
+        ...cs,
+        [key]: 'wrong',
+        [`${targetCell.stringIndex}-${targetCell.fret}`]: 'target',
+      }))
+      setWrongInfo({ heardNote: clickedNote, heardOctave: clickedOctave })
     }
+  }
+
+  function dismissWrong() {
+    setWrongInfo(null)
+    pickTarget()
   }
 
   const accuracy = score.attempts > 0 ? Math.round((score.correct / score.attempts) * 100) : 0
@@ -155,10 +166,23 @@ export default function PracticeMode() {
 
       <div className="prompt">
         Find: <span className="target-note">{targetNote}{targetOctave}</span>
-        {feedback && <span className="feedback-msg">{feedback}</span>}
       </div>
 
       <Fretboard activeStrings={activeStrings} cellState={cellState} onCellClick={handleCellClick} />
+
+      {wrongInfo && (
+        <div className="wrong-overlay" onClick={dismissWrong}>
+          <div className="wrong-panel">
+            <div className="wrong-heard">
+              You played <strong>{wrongInfo.heardNote}{wrongInfo.heardOctave}</strong>
+            </div>
+            <div className="wrong-target">
+              The correct note was <strong>{targetNote}{targetOctave}</strong> — {targetCell && describeCell(targetCell.stringIndex, targetCell.fret)}
+            </div>
+            <div className="wrong-hint">Click anywhere to continue</div>
+          </div>
+        </div>
+      )}
 
       <div className="stats">
         <span>Score: {score.correct}/{score.attempts}</span>

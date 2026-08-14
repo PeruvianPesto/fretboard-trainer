@@ -192,6 +192,51 @@ h1 {
   fill: var(--wrong) !important;
 }
 
+.cell-target {
+  fill: transparent !important;
+  stroke: var(--accent) !important;
+  stroke-width: 3 !important;
+}
+
+.wrong-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 100;
+}
+
+.wrong-panel {
+  background: var(--panel);
+  border: 1px solid var(--wrong);
+  border-radius: 12px;
+  padding: 28px 36px;
+  max-width: 360px;
+  text-align: center;
+  cursor: default;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+}
+
+.wrong-heard {
+  font-size: 1.15rem;
+  color: var(--wrong);
+  margin-bottom: 10px;
+}
+
+.wrong-target {
+  font-size: 1.05rem;
+  color: var(--text);
+  margin-bottom: 18px;
+}
+
+.wrong-hint {
+  font-size: 0.8rem;
+  color: #c8c8cc;
+}
+
 .stats {
   display: flex;
   justify-content: center;
