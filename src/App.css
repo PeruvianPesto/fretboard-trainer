@@ -198,6 +198,66 @@ h1 {
   stroke-width: 3 !important;
 }
 
+.cell-selected {
+  fill: var(--accent) !important;
+}
+
+.chord-hint {
+  font-size: 0.9rem;
+  color: #c8c8cc;
+  margin: 0 0 12px;
+}
+
+.chord-alts {
+  font-size: 0.9rem;
+  color: #c8c8cc;
+  margin-bottom: 12px;
+}
+
+.chord-strings {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 18px;
+  flex-wrap: wrap;
+}
+
+.chord-string {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 40px;
+}
+
+.chord-string-label {
+  font-size: 0.8rem;
+  color: #c8c8cc;
+}
+
+.chord-string-fret {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+
+.chord-string-fret.muted {
+  color: var(--wrong);
+}
+
+.chord-string-note {
+  font-size: 0.8rem;
+  color: var(--text);
+  min-height: 1em;
+}
+
+.chord-notes {
+  margin-top: 14px;
+  font-size: 0.95rem;
+  color: #c8c8cc;
+}
+
 .wrong-overlay {
   position: fixed;
   inset: 0;
