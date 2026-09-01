@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, useCallback, useRef } from 'react'
 import Fretboard from './Fretboard.jsx'
 import Controls, { GROUPS } from './Controls.jsx'
-import { STRINGS, cellsForStrings, cellsMatchingNote, noteAt, octaveAt, randomChoice } from '../lib/fretboard.js'
+import { STRINGS, ALL_STRING_INDICES, cellsForStrings, cellsMatchingNote, noteAt, octaveAt, randomChoice } from '../lib/fretboard.js'
 import { usePitchDetector } from '../hooks/usePitchDetector.js'
 import { useStableNote } from '../hooks/useStableNote.js'
 
@@ -33,7 +33,7 @@ export default function PracticeMode() {
   const activeStrings = useMemo(() => {
     if (mode === 'single') return new Set([singleString])
     if (mode === 'group') return new Set(group)
-    return new Set([0, 1, 2, 3, 4, 5])
+    return new Set(ALL_STRING_INDICES)
   }, [mode, singleString, group])
 
   const scopeCells = useMemo(

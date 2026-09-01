@@ -88,7 +88,7 @@ export default function Fretboard({ activeStrings, cellState, onCellClick }) {
       {STRINGS.map((_s, stringIndex) =>
         Array.from({ length: FRET_COUNT + 1 }, (_, fret) => fret).map((fret) => {
           const key = `${stringIndex}-${fret}`
-          const state = cellState[key] // undefined | 'correct' | 'wrong'
+          const state = cellState[key] // undefined, or any string → `cell-<state>` class
           const active = isActive(stringIndex)
           return (
             <circle

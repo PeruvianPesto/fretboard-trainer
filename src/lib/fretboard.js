@@ -20,20 +20,34 @@ export const STRINGS = [
 
 export const FRET_COUNT = 22
 
+// String indices as they sit in STRINGS (row 0 = high e … row 5 = low E).
+export const ALL_STRING_INDICES = STRINGS.map((_, i) => i)
+// The same indices low-to-high (low E first) — chord-chart / tab reading order.
+export const STRING_INDICES_LOW_TO_HIGH = [...ALL_STRING_INDICES].reverse()
+
 // Frets that traditionally get inlay markers (12 gets a double dot).
 export const MARKER_FRETS = [3, 5, 7, 9, 12, 15, 17, 19, 21]
 
+// Semitones from C0 — the absolute pitch, octave and pitch class folded into
+// one number so notes can be ordered and compared by how they actually sound.
+export function absoluteSemitoneAt(stringIndex, fret) {
+  const { openIndex, openOctave } = STRINGS[stringIndex]
+  return openOctave * 12 + openIndex + fret
+}
+
+// Pitch class (0 = C … 11 = B), i.e. the note name with the octave stripped off.
+export function pitchClassAt(stringIndex, fret) {
+  return absoluteSemitoneAt(stringIndex, fret) % 12
+}
+
 export function noteAt(stringIndex, fret) {
-  const { openIndex } = STRINGS[stringIndex]
-  return NOTE_NAMES[(openIndex + fret) % 12]
+  return NOTE_NAMES[pitchClassAt(stringIndex, fret)]
 }
 
 // Octave number in scientific pitch notation (e.g. the "4" in E4).
 // Notes an octave apart share a name/pitch class but differ here.
 export function octaveAt(stringIndex, fret) {
-  const { openIndex, openOctave } = STRINGS[stringIndex]
-  const absoluteSemitone = openOctave * 12 + openIndex + fret
-  return Math.floor(absoluteSemitone / 12)
+  return Math.floor(absoluteSemitoneAt(stringIndex, fret) / 12)
 }
 
 // Full scientific pitch notation, e.g. "E2" (open low E) vs "E3" (12th fret).

@@ -202,16 +202,17 @@ h1 {
   fill: var(--accent) !important;
 }
 
-.chord-hint {
+/* Chord-tone dot that is the chord root — filled white with an accent ring. */
+.cell-root {
+  fill: #ffffff !important;
+  stroke: var(--accent) !important;
+  stroke-width: 3 !important;
+}
+
+.chord-meta {
   font-size: 0.9rem;
   color: #c8c8cc;
   margin: 0 0 12px;
-}
-
-.chord-alts {
-  font-size: 0.9rem;
-  color: #c8c8cc;
-  margin-bottom: 12px;
 }
 
 .chord-strings {
@@ -249,6 +250,13 @@ h1 {
 .chord-string-note {
   font-size: 0.8rem;
   color: var(--text);
+  min-height: 1em;
+}
+
+.chord-string-interval {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--accent);
   min-height: 1em;
 }
 

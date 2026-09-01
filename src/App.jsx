@@ -2,29 +2,36 @@ import { useState } from 'react'
 import PracticeMode from './components/PracticeMode.jsx'
 import ChallengeMode from './components/ChallengeMode.jsx'
 import ChordCreator from './components/ChordCreator.jsx'
+import ChordGlossary from './components/ChordGlossary.jsx'
+
+const TABS = [
+  { id: 'practice', label: 'Practice', Component: PracticeMode },
+  { id: 'challenge', label: 'Challenge', Component: ChallengeMode },
+  { id: 'chord', label: 'Chord Creator', Component: ChordCreator },
+  { id: 'glossary', label: 'Chord Glossary', Component: ChordGlossary },
+]
 
 export default function App() {
-  const [tab, setTab] = useState('practice') // 'practice' | 'challenge' | 'chord'
+  const [tab, setTab] = useState('practice')
+  const ActiveMode = TABS.find((t) => t.id === tab).Component
 
   return (
     <div className="app">
-      <h1>Fretboard Trainer</h1>
+      <h1>Bonk's Fretboard Trainer</h1>
 
       <div className="tabs">
-        <button className={tab === 'practice' ? 'tab-btn active' : 'tab-btn'} onClick={() => setTab('practice')}>
-          Practice
-        </button>
-        <button className={tab === 'challenge' ? 'tab-btn active' : 'tab-btn'} onClick={() => setTab('challenge')}>
-          Challenge
-        </button>
-        <button className={tab === 'chord' ? 'tab-btn active' : 'tab-btn'} onClick={() => setTab('chord')}>
-          Chord Creator
-        </button>
+        {TABS.map((t) => (
+          <button
+            key={t.id}
+            className={tab === t.id ? 'tab-btn active' : 'tab-btn'}
+            onClick={() => setTab(t.id)}
+          >
+            {t.label}
+          </button>
+        ))}
       </div>
 
-      {tab === 'practice' && <PracticeMode />}
-      {tab === 'challenge' && <ChallengeMode />}
-      {tab === 'chord' && <ChordCreator />}
+      <ActiveMode />
     </div>
   )
 }
