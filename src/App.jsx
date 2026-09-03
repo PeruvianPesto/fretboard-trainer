@@ -17,9 +17,14 @@ export default function App() {
 
   return (
     <div className="app">
-      <h1>Bonk's Fretboard Trainer</h1>
+      <header className="topbar">
+        <div className="brand">
+          <h1>Bonk's Fretboard Trainer</h1>
+        </div>
+        <p className="brand-sub">Note &amp; chord drills across the EADGBE neck</p>
+      </header>
 
-      <div className="tabs">
+      <nav className="tabs">
         {TABS.map((t) => (
           <button
             key={t.id}
@@ -29,9 +34,11 @@ export default function App() {
             {t.label}
           </button>
         ))}
-      </div>
+      </nav>
 
-      <ActiveMode />
+      <main className="mode-panel">
+        <ActiveMode />
+      </main>
     </div>
   )
 }
