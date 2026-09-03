@@ -204,6 +204,33 @@ h1 {
   font-variant-numeric: tabular-nums;
 }
 
+/* ---- VU meter: live mic level ------------------------- */
+
+.vu-meter {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 28px;
+  padding: 4px 8px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+}
+
+.vu-bar {
+  width: 4px;
+  height: 100%;
+  border-radius: 1px;
+  transform: scaleY(0.04);
+  transform-origin: bottom;
+  background: linear-gradient(to top, var(--correct), #b7e07f 65%, var(--accent));
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vu-bar { transition: none; }
+}
+
 /* ---- Prompt + target: the single focal element ---------- */
 
 .prompt {

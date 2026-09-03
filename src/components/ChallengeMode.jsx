@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, useCallback, useRef } from 'react'
 import Fretboard from './Fretboard.jsx'
 import Controls, { GROUPS } from './Controls.jsx'
+import VuMeter from './VuMeter.jsx'
 import { ALL_STRING_INDICES, cellsForStrings, noteAt, octaveAt, randomChoice } from '../lib/fretboard.js'
 import { usePitchDetector } from '../hooks/usePitchDetector.js'
 import { useStableNote } from '../hooks/useStableNote.js'
@@ -29,7 +30,7 @@ export default function ChallengeMode() {
   const [timeLeftMs, setTimeLeftMs] = useState(duration * 1000)
   const [result, setResult] = useState(null) // { correct, attempts, avgMs, notesPerMinute, bestStreak }
 
-  const { listening, error: micError, pitch, start: startListening, stop: stopListening } = usePitchDetector()
+  const { listening, error: micError, pitch, start: startListening, stop: stopListening, getAnalyser } = usePitchDetector()
 
   const deadlineRef = useRef(0)
   const noteStartRef = useRef(0)
@@ -221,6 +222,7 @@ export default function ChallengeMode() {
             {listening ? '⏹ Stop listening' : '🎤 Start listening'}
           </button>
           {micError && <span className="mic-error">{micError}</span>}
+          <VuMeter getAnalyser={getAnalyser} active={listening} />
         </div>
 
         <button className="start-btn" onClick={startChallenge}>Start Challenge</button>
@@ -274,6 +276,7 @@ export default function ChallengeMode() {
 
       {listening && (
         <div className="mic-row">
+          <VuMeter getAnalyser={getAnalyser} active={listening} />
           <span className="heard-note">
             {heard ? `Hearing: ${heard.note}${heard.octave} (${heard.cents > 0 ? '+' : ''}${heard.cents}¢)` : 'Listening…'}
           </span>

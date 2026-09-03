@@ -41,6 +41,10 @@ export function usePitchDetector() {
     rafRef.current = requestAnimationFrame(tick)
   }, [])
 
+  // Lets a VU meter read the live signal without forcing this hook to
+  // re-render every animation frame. Returns null until the mic is running.
+  const getAnalyser = useCallback(() => analyserRef.current, [])
+
   const stop = useCallback(() => {
     if (rafRef.current) cancelAnimationFrame(rafRef.current)
     rafRef.current = null
@@ -66,6 +70,7 @@ export function usePitchDetector() {
       const source = audioCtx.createMediaStreamSource(stream)
       const analyser = audioCtx.createAnalyser()
       analyser.fftSize = FFT_SIZE
+      analyser.smoothingTimeConstant = 0.6 // livelier VU meter; doesn't affect pitch (time-domain) data
       source.connect(analyser)
 
       streamRef.current = stream
@@ -85,5 +90,5 @@ export function usePitchDetector() {
   // Release the mic if the component unmounts while still listening.
   useEffect(() => () => stop(), [stop])
 
-  return { listening, error, pitch, start, stop }
+  return { listening, error, pitch, start, stop, getAnalyser }
 }

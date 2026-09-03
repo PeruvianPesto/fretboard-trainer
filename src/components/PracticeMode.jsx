@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, useCallback, useRef } from 'react'
 import Fretboard from './Fretboard.jsx'
 import Controls, { GROUPS } from './Controls.jsx'
+import VuMeter from './VuMeter.jsx'
 import { STRINGS, ALL_STRING_INDICES, cellsForStrings, cellsMatchingNote, noteAt, octaveAt, randomChoice } from '../lib/fretboard.js'
 import { usePitchDetector } from '../hooks/usePitchDetector.js'
 import { useStableNote } from '../hooks/useStableNote.js'
@@ -26,7 +27,7 @@ export default function PracticeMode() {
   const [elapsedMs, setElapsedMs] = useState(0) // stopwatch for the current note, resets on each correct answer
   const [avgMs, setAvgMs] = useState(null) // running average time-to-correct-answer
 
-  const { listening, error: micError, pitch, start: startListening, stop: stopListening } = usePitchDetector()
+  const { listening, error: micError, pitch, start: startListening, stop: stopListening, getAnalyser } = usePitchDetector()
   const startTimeRef = useRef(performance.now())
   const timeTotalsRef = useRef({ sum: 0, count: 0 })
 
@@ -157,6 +158,7 @@ export default function PracticeMode() {
           {listening ? '⏹ Stop listening' : '🎤 Start listening'}
         </button>
         {micError && <span className="mic-error">{micError}</span>}
+        <VuMeter getAnalyser={getAnalyser} active={listening} />
         {listening && (
           <span className="heard-note">
             {heard ? `Hearing: ${heard.note}${heard.octave} (${heard.cents > 0 ? '+' : ''}${heard.cents}¢)` : 'Listening…'}
